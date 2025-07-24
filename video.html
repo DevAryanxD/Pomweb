@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming on Fap Flix</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <a href="index.html" class="back-btn">← Back to Home</a>
+    <h1 id="title">Loading...</h1>
+  </header>
+  <main>
+    <div class="video-player">
+      <video id="player" controls autoplay playsinline></video>
+    </div>
+    <section id="related-videos" class="videos-container"></section>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+    const title = params.get('title') || 'Untitled';
+
+    document.getElementById('title').textContent = title;
+
+    fetch(`https://silent-noor-stream-api.woodmirror.workers.dev/api?url=${encodeURIComponent(url)}`)
+      .then(res => res.json())
+      .then(data => {
+        const player = document.getElementById('player');
+        player.src = data.streaming_url;
+        player.poster = data.thumbnail; // Add thumbnail as poster
+      })
+      .catch(err => {
+        document.getElementById('title').textContent = 'Error loading video';
+        console.error(err);
+      });
+
+    // Load related videos (placeholder)
+    fetch('data.json')
+      .then(res => res.json())
+      .then(videos => {
+        const relatedContainer = document.getElementById('related-videos');
+        videos.slice(0, 4).forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <a href="video.html?url=${encodeURIComponent(item.url)}&title=${encodeURIComponent(item.title || 'Untitled')}">
+              <img src="https://via.placeholder.com/200x150" alt="${item.title || 'Untitled'}" loading="lazy">
+              <p>${item.title || 'Untitled'}</p>
+            </a>
+          `;
+          relatedContainer.appendChild(card);
+        });
+      });
+  </script>
+</body>
+</html>
